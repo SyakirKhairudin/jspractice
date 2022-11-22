@@ -5,7 +5,7 @@
     <body>
         
         <div>
-            Syakir's To Do
+          To Do List
         </div>
 
         <input id="todo-title" type="textbox" />
@@ -21,8 +21,18 @@
         <div id="todo-list"> </div>
         
         <script>
-     
-          const todos = [{
+          // Model
+          //if localstorage has a todos array, then use it
+          //otherwise use default
+          let todos;
+
+          //retrive from localstorage
+          const savedTodos = JSON.parse(localStorage.getItem('todos'));
+          //check if it's an array
+          if(Array.isArray(savedTodos)){
+            todos = savedTodos;
+          } else {
+            todos = [{
             title: 'Get groceries', 
             dueDate: '1',
             id: 'id1'
@@ -35,32 +45,63 @@
             dueDate: '3',
             id: 'id3'
           }];
-        
-           
-          render();
-
-          function addTodo() {
-               const textbox = document.getElementById('todo-title');
-               const title = textbox.value;
-
-               const id =new Date ().getTime();
-
-               const datePicker = document.getElementById('date-picker');
-               const dueDate = datePicker.value;
-               todos.push({
+        }
+                
+          // Creates a todo
+          function createTodo(title, dueDate){
+            const id = '' + new Date ().getTime();
+            todos.push({
                 title: title,
                 dueDate: dueDate,
                 id: id
                });
 
+               saveTodos();
+          }
+          
+          render();
+
+           // Deletes a todo
+          function removeTodo(idToDelete){
+            todos =  todos.filter(function (todo){
+              // if the id for this to do matches idToDelete, return false
+              // For everything else return true
+              if (todo.id === idToDelete) {
+                return false;
+              } else {
+                return true;
+              }            
+              });  
+
+              saveTodos();
+          }
+
+          function saveTodos(){
+            localStorage.setItem('todos', JSON.stringify(todos));
+          }
+
+            //Controller
+          function addTodo() {
+               const textbox = document.getElementById('todo-title');
+               const title = textbox.value;
+
+               const datePicker = document.getElementById('date-picker');
+               const dueDate = datePicker.value;
+
+               createTodo(title, dueDate);
                render();
             };
-            
-            function deleteTodo() {
-            
 
+            function deleteTodo(event) {
+              const deleteButton =event.target;
+              const idToDelete = deleteButton.id;
+
+              removeTodo(idToDelete)
+              
+              render();           
             }
 
+            //View
            function render (){
               //reset our list
 
@@ -68,7 +109,7 @@
 
                todos.forEach(function (todo){
                  const element = document.createElement('div');
-                 element.innerText = todo.title + '' + todo.dueDate;
+                 element.innerText = todo.title + ' ' + todo.dueDate;
 
                  const deleteButton = document.createElement('button');
                  deleteButton.innerText = 'Delete';
